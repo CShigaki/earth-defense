@@ -1,0 +1,11 @@
+body {
+  background-color: teal;
+  padding: 0;
+  margin: 0;
+}
+
+#main-div {
+  width: 620px;
+  height: 800px;
+  margin: 0 auto;
+}

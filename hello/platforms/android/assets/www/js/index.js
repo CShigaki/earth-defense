@@ -1,32 +1,49 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 var width = screen.width;
 var height = screen.height;
 var screenRatio;
 var realWidth;
 var realHeight;
 
-var game;
+var game = new Phaser.Game(620, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 var cursors;
 
+
 function preload() {
+  game.load.image('space', 'img/space.jpg');
+  game.load.spritesheet('asteroids', 'img/asteroid-spritesheet.png', 128, 130);
+}
+
+var asteroids;
+function create() {
+  game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  game.add.sprite(0, 0, 'space');
+  asteroids = game.add.group();
+  //asteroids = asteroids.create(0, 0, 'asteroids');
+  //asteroids.animations.add('falling', [0, 1, 2, 3, 4, 5, 6], 3, true);
+
+
+}
+
+function update() {
+  if (Math.random() < 0.05) {
+    for (var i = 0; i < asteroids.children.length; i++) {
+      asteroids.children[i].play('falling');
+    }
+    var currentAsteroid = asteroids.create(Math.floor((Math.random() * 620) + 1), -50, 'asteroids');
+    game.physics.enable(currentAsteroid);
+    currentAsteroid.inputEnabled = true;
+    currentAsteroid.scale.setTo(0.5, 0.5);
+    currentAsteroid.animations.add('falling', [0, 1, 2, 3, 4, 5, 6], 3, true);
+    currentAsteroid.body.gravity.y = 30;
+    currentAsteroid.events.onInputDown.add(destroyAsteroid, this);
+  }
+}
+
+function destroyAsteroid(event) {
+  event.kill();
+}
+/*function preload() {
   game.load.image('sky', 'img/sky.png');
   game.load.image('ground', 'img/platform.png');
   game.load.image('star', 'img/star.png');
@@ -42,6 +59,7 @@ function preload() {
     realHeight=width;
     screenRatio=(width/height);
   }
+
 }
 
 var platforms;
@@ -91,41 +109,30 @@ function create() {
 }
 
 function update() {
+  game.physics.arcade.collide(player, platforms);
+  game.physics.arcade.collide(stars, platforms);
+  game.physics.arcade.overlap(player, stars, collecStar, null, this);
 
+  player.body.velocity.x = 0;
+
+  if (cursors.left.isDown) {
+    player.body.velocity.x = -150;
+    player.animations.play('left');
+  }
+  else if (cursors.right.isDown) {
+    player.body.velocity.x = 150;
+    player.animations.play('right');
+  }
+  else {
+    player.animations.stop();
+    player.frame = 4;
+  }
+
+  if (cursors.up.isDown && player.body.touching.down) {
+    player.body.velocity.y = -350;
+  }
 }
 
 function collecStar(player, star) {
-
-}
-
-
-var app = {
-    // Application Constructor
-    initialize: function() {
-      this.bindEvents();
-    },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-      document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-      app.receivedEvent('deviceready');
-      /*$('#app-container').css('height', '600px');
-      $('#app-container').css('width', '800px');*/
-      game = new Phaser.Game(width, height, Phaser.CANVAS, 'app-container', { preload: preload, create: create, update: update });
-      alert('ready');
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-
-    }
-};
-
-app.initialize();
+  star.kill();
+}*/
